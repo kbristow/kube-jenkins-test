@@ -12,16 +12,20 @@ volumes: []
         def gitBranch = myRepo.GIT_BRANCH
         def shortGitCommit = "${gitCommit[0..10]}"
 
+        stage('Build') {
+            container('maven') {
+                sh "mvn install"
+            }
+        }
+
         stage('Test') {
             container('maven') {
                 sh "mvn test"
             }
         }
 
-        stage('Build') {
+        stage('Package') {
             container('kaniko') {
-                sh 'ls'
-                sh 'pwd'
                 sh "executor --context=\$(pwd) --destination=registry.kube-system.svc.cluster.local/something:latest --dockerfile=Dockerfile"
             }
         }
