@@ -2,6 +2,7 @@ def label = "worker-${UUID.randomUUID().toString()}"
 
 podTemplate(label: label, containers: [
   containerTemplate(name: 'maven', image: 'maven:3.6.1-jdk-11-slim', command: 'cat', ttyEnabled: true),
+  containerTemplate(name: 'kaniko', image: 'kbristow/kaniko-simple:latest', command: 'cat', ttyEnabled: true),
 ], 
 volumes: []
 ){
@@ -11,9 +12,17 @@ volumes: []
         def gitBranch = myRepo.GIT_BRANCH
         def shortGitCommit = "${gitCommit[0..10]}"
 
-        stage('Build') {
+        stage('Test') {
             container('maven') {
-                sh "mvn package"
+                sh "mvn test"
+            }
+        }
+
+        stage('Build') {
+            container('kaniko') {
+                sh 'ls'
+                sh 'pwd'
+                sh "executor --context=$(pwd) --destination=registry.kube-system.svc.cluster.local/something:latest --dockerfile=Dockerfile"
             }
         }
     }
