@@ -22,7 +22,7 @@ volumes: []
             container('kaniko') {
                 sh 'ls'
                 sh 'pwd'
-                sh "executor --context=$(pwd) --destination=registry.kube-system.svc.cluster.local/something:latest --dockerfile=Dockerfile"
+                sh "executor --context=\$(pwd) --destination=registry.kube-system.svc.cluster.local/something:latest --dockerfile=Dockerfile"
             }
         }
     }
