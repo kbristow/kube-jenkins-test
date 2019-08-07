@@ -1,11 +1,12 @@
 def label = "worker-${UUID.randomUUID().toString()}"
 
 podTemplate(label: label, containers: [
-  containerTemplate(name: 'maven', image: 'maven:3.6.1-jdk-11-slim', command: 'cat', ttyEnabled: true),
-  containerTemplate(name: 'kaniko', image: 'kbristow/kaniko-simple:latest', command: 'cat', ttyEnabled: true),
+    containerTemplate(name: 'maven', image: 'maven:3.6.1-jdk-11-slim', command: 'cat', ttyEnabled: true),
+    containerTemplate(name: 'kaniko', image: 'kbristow/kaniko-simple:latest', command: 'cat', ttyEnabled: true),
 ], 
-volumes: []
-){
+volumes: [
+    persistentVolumeClaim(claimName: 'maven-cache', mountPath: '/root/.m2cache')
+]){
     node(label) {
         def myRepo = checkout scm
         def gitCommit = myRepo.GIT_COMMIT
@@ -14,13 +15,13 @@ volumes: []
 
         stage('Build') {
             container('maven') {
-                sh "mvn install"
+                sh "mvn -Dmaven.repo.local=/root/.m2cache install"
             }
         }
 
         stage('Test') {
             container('maven') {
-                sh "mvn test"
+                sh "mvn -Dmaven.repo.local=/root/.m2cache test"
             }
         }
 
