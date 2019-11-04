@@ -2,10 +2,11 @@ def label = "worker-${UUID.randomUUID().toString()}"
 
 podTemplate(label: label, containers: [
     containerTemplate(name: 'maven', image: 'maven:3.6.1-jdk-11-slim', command: 'cat', ttyEnabled: true),
-    containerTemplate(name: 'kaniko', image: 'kbristow/kaniko-simple:latest', command: 'cat', ttyEnabled: true),
+    containerTemplate(name: 'kaniko', image: 'gcr.io/kaniko-project/executor:debug-v0.13.0', command: 'cat', ttyEnabled: true),
 ], 
 volumes: [
-    persistentVolumeClaim(claimName: 'maven-cache', mountPath: '/root/.m2cache')
+    persistentVolumeClaim(claimName: 'maven-cache', mountPath: '/root/.m2cache'),
+    secretVolume(mountPath: '/docker/auth/', secretName: 'regcred')
 ]){
     node(label) {
         def myRepo = checkout scm
@@ -27,7 +28,8 @@ volumes: [
 
         stage('Package') {
             container('kaniko') {
-                sh "executor --context=\$(pwd) --destination=registry.kube-system.svc.cluster.local/something:latest --dockerfile=Dockerfile"
+                sh "cp /docker/auth/.dockerconfigjson /kaniko/.docker/config.json"
+                sh "executor --cache=true --skip-tls-verify --context=\$(pwd) --dockerfile=Dockerfile --destination=kbristow/kube-jenkins-test:${shortGitCommit}"
             }
         }
     }
