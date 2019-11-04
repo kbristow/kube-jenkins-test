@@ -29,7 +29,7 @@ volumes: [
         stage('Package') {
             container('kaniko') {
                 sh "cp /docker/auth/.dockerconfigjson /kaniko/.docker/config.json"
-                sh "executor --cache=true --skip-tls-verify --context=\$(pwd) --dockerfile=Dockerfile --destination=kbristow/kube-jenkins-test:${shortGitCommit}"
+                sh "executor --skip-tls-verify --context=\$(pwd) --dockerfile=Dockerfile --destination=kbristow/kube-jenkins-test:${shortGitCommit}"
             }
         }
     }
