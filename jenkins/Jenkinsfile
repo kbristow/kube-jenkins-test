@@ -17,6 +17,13 @@ serviceAccount: "jenkins"
         def gitBranch = myRepo.GIT_BRANCH
         def shortGitCommit = "${gitCommit[0..10]}"
 
+        stage('Deploy') {
+            container('deploy-tools') {
+                sh "helm upgrade kube-jenkins-test ./charts --namespace=jenkins --set image.tag=1e49658de70"
+                sh "./deployer.py --namespace=jenkins --deployment_name=kube-jenkins-test-maven"
+            }
+        }
+
         stage('Build') {
             container('maven') {
                 sh "mvn -Dmaven.repo.local=/root/.m2cache install"
@@ -33,13 +40,6 @@ serviceAccount: "jenkins"
             container('kaniko') {
                 sh "cp /docker/auth/.dockerconfigjson /kaniko/.docker/config.json"
                 sh "executor --skip-tls-verify --context=\$(pwd) --dockerfile=Dockerfile --destination=kbristow/kube-jenkins-test:${shortGitCommit}"
-            }
-        }
-
-        stage('Deploy') {
-            container('deploy-tools') {
-                sh "helm upgrade kube-jenkins-test ./charts --namespace=jenkins --set image.tag=${shortGitCommit}"
-                sh "./deployer.py --namespace=jenkins --deployment_name=kube-jenkins-test-maven"
             }
         }
     }
