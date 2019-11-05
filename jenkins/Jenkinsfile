@@ -3,7 +3,7 @@ def label = "worker-${UUID.randomUUID().toString()}"
 podTemplate(label: label, containers: [
     containerTemplate(name: 'maven', image: 'maven:3.6.1-jdk-11-slim', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'kaniko', image: 'gcr.io/kaniko-project/executor:debug-v0.13.0', command: 'cat', ttyEnabled: true),
-    containerTemplate(name: 'deploy-tools', image: 'kbristow/deploy-tools:0.0.4', command: 'cat', ttyEnabled: true),
+    containerTemplate(name: 'deploy-tools', image: 'kbristow/deploy-tools:0.0.5', command: 'cat', ttyEnabled: true),
 ], 
 volumes: [
     persistentVolumeClaim(claimName: 'maven-cache', mountPath: '/root/.m2cache'),
