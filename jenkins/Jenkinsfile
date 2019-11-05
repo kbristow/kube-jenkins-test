@@ -36,7 +36,7 @@ volumes: [
 
         stage('Deploy') {
             container('deploy-tools') {
-                sh "helm3 upgrade kube-jenkins-test ./charts --namespace=jenkins --set image.tag=${shortGitCommit}"
+                sh "helm upgrade kube-jenkins-test ./charts --namespace=jenkins --set image.tag=${shortGitCommit}"
                 sh "./deployer.py --namespace=jenkins --deployment_name=kube-jenkins-test-maven"
             }
         }
