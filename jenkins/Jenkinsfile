@@ -8,7 +8,9 @@ podTemplate(label: label, containers: [
 volumes: [
     persistentVolumeClaim(claimName: 'maven-cache', mountPath: '/root/.m2cache'),
     secretVolume(mountPath: '/docker/auth/', secretName: 'regcred')
-]){
+],
+serviceAccount: "jenkins"
+){
     node(label) {
         def myRepo = checkout scm
         def gitCommit = myRepo.GIT_COMMIT
