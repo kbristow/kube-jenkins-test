@@ -3,7 +3,7 @@ def label = "worker-${UUID.randomUUID().toString()}"
 podTemplate(label: label, containers: [
     containerTemplate(name: 'maven', image: 'maven:3.6.1-jdk-11-slim', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'kaniko', image: 'gcr.io/kaniko-project/executor:debug-v0.13.0', command: 'cat', ttyEnabled: true),
-    containerTemplate(name: 'deploy-tools', image: 'kbristow/deploy-tools:0.0.1', command: 'cat', ttyEnabled: true),
+    containerTemplate(name: 'deploy-tools', image: 'kbristow/deploy-tools:0.0.3', command: 'cat', ttyEnabled: true),
 ], 
 volumes: [
     persistentVolumeClaim(claimName: 'maven-cache', mountPath: '/root/.m2cache'),
@@ -20,7 +20,7 @@ serviceAccount: "jenkins"
         stage('Deploy') {
             container('deploy-tools') {
                 sh "helm upgrade kube-jenkins-test ./charts --namespace=jenkins --set image.tag=1e49658de70"
-                sh "./deployer.py --namespace=jenkins --deployment_name=kube-jenkins-test-maven"
+                sh "deployer --namespace=jenkins --deployment_name=kube-jenkins-test-maven"
             }
         }
 
